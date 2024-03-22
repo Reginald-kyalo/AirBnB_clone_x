@@ -31,29 +31,20 @@ class HBNBCommand(cmd.Cmd):
         """prints string representation of instance
         based on class name
         Ex: (hbnb) show BaseModel
-
-        Args:
-            arg (_type_): _description_
         """
-        line = arg.strip().split()
-        model_name, model_id = line
+        args = arg.strip().split()
         objs = storage.all()
         
-        if model_name:
-            if model_name in HBNBCommand.__classes:
-                if model_id:
-                    for key, value in objs.items():
-                        inst_id = key.split(".")[1]
-                        if model_id is inst_id:
-                            print(value)
-                        else:
-                            print("** no instance found **")
-                else:
-                    print("** instance id missing **")
-            else:
-                print("** class doesn't exist **")
-        else:
+        if len(args) == 0:
             print("** class name missing **")
+        if len(args) == 1:
+            print(print("** instance id missing **"))
+        if args[0] not in HBNBCommand.__classes:
+            print("** class doesn't exist **")
+        elif "{}.{}".format(args[0], args[1]) not in objs:
+            print("** no instance found **")
+        else:
+            print(objs["{}.{}".format(args[0], args[1])])
     
     def do_destroy(self, arg):
         """Deletes an instance based on the class name and id
@@ -85,21 +76,17 @@ class HBNBCommand(cmd.Cmd):
         Ex: $ all BaseModel or $ all
         """
         model_name = arg.strip()
-        objs = storage.all()
+        objs = storage.all().values()
+        list = []
         
-        if model_name:
-            if model_name in HBNBCommand.__classes:
-                for key, value in objs.items():
-                    my_key = key.split(".")[0]
-                    if my_key is model_name:
-                        list.append(value)
-                print(list)
-            else:
-                print("** class doesn't exist **")    
-        else:
-            for value in objs.items():
-                list.append(value)
-            print(list)
+        if model_name not in HBNBCommand.__classes:
+            print("** class doesn't exist **")
+        for obj in objs:
+            if model_name == obj.__class__.__name__:
+                list.append(obj.__str__())
+            elif not model_name:
+                list.append(obj.__str__())
+        print(list)
     
     def update(self, arg):
         """adds or updates attribute to an instance
